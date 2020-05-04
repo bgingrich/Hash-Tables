@@ -8,7 +8,6 @@ class HashTableEntry:
         self.value = value
         self.next = None
 
-
 class HashTable:
     """
     A hash table that with `capacity` buckets
@@ -16,20 +15,21 @@ class HashTable:
 
     Implement this.
     """
-
-    def fnv1(self, key):
-        """
-        FNV-1 64-bit hash function
-
-        Implement this, and/or DJB2.
-        """
-
+    def __init__ (self, capacity):
+        self.capacity = capacity
+        self.storage = [None] * capacity
+    
     def djb2(self, key):
         """
         DJB2 32-bit hash function
 
         Implement this, and/or FNV-1.
         """
+        hash = 5381
+        for i in key:
+            hash = ((hash << 5) + hash) + ord(i)
+            hash &= 0xffffffff
+        return hash
 
     def hash_index(self, key):
         """
@@ -47,6 +47,8 @@ class HashTable:
 
         Implement this.
         """
+        index = self.hash_index(key)
+        self.storage[index] = HashTableEntry(key, value)
 
     def delete(self, key):
         """
@@ -56,6 +58,10 @@ class HashTable:
 
         Implement this.
         """
+        index = self.hash_index(key)
+        if self.storage[index] is None:
+            print("Key is not there")
+        self.storage[index] = None
 
     def get(self, key):
         """
@@ -65,6 +71,10 @@ class HashTable:
 
         Implement this.
         """
+        index = self.hash_index(key)
+        if self.storage[index] is None:
+            return None
+        return self.storage[index].value
 
     def resize(self):
         """
@@ -73,6 +83,7 @@ class HashTable:
 
         Implement this.
         """
+        pass
 
 if __name__ == "__main__":
     ht = HashTable(2)
@@ -88,16 +99,16 @@ if __name__ == "__main__":
     print(ht.get("line_2"))
     print(ht.get("line_3"))
 
-    # Test resizing
-    old_capacity = len(ht.storage)
-    ht.resize()
-    new_capacity = len(ht.storage)
+    # # Test resizing
+    # old_capacity = len(ht.storage)
+    # ht.resize()
+    # new_capacity = len(ht.storage)
 
-    print(f"\nResized from {old_capacity} to {new_capacity}.\n")
+    # print(f"\nResized from {old_capacity} to {new_capacity}.\n")
 
-    # Test if data intact after resizing
-    print(ht.get("line_1"))
-    print(ht.get("line_2"))
-    print(ht.get("line_3"))
+    # # Test if data intact after resizing
+    # print(ht.get("line_1"))
+    # print(ht.get("line_2"))
+    # print(ht.get("line_3"))
 
-    print("")
+    # print("")
