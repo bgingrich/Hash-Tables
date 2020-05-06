@@ -50,6 +50,10 @@ class HashTable:
         index = self.hash_index(key)
         new_pair = HashTableEntry(key, value)
 
+        loadFactor = self.size() / self.capacity
+        if loadFactor > 0.7:
+            self.resize()
+
         node = self.storage[index]
         if node is None:
             self.storage[index] = new_pair
@@ -64,6 +68,10 @@ class HashTable:
         
         else:
             node.value = value
+
+        loadFactor = self.size() / self.capacity
+        if loadFactor > 0.7:
+            self.resize()
 
     def delete(self, key):
         """
@@ -87,6 +95,10 @@ class HashTable:
         if node is None:
             print("f{key} not found")
             return None
+
+        loadFactor = self.size() / self.capacity
+        if loadFactor > 0.7:
+            self.resize()
         
         prev.next = node.next
 
@@ -110,14 +122,45 @@ class HashTable:
         else:
             return node. value
 
-    def resize(self, new_capacity):
+    def size(self):
+        size = 0
+        for i in self.storage:
+            r = i
+            while r is not None:
+                size += 1
+                if r.next is None:
+                    break
+                else:
+                    r = r.next
+        return size
+
+    def resize(self, new_capacity=None):
         """
         Doubles the capacity of the hash table and
         rehash all key/value pairs.
 
         Implement this.
         """
-        pass
+        if new_capacity is not None:
+            self.capacity = new_capacity
+        else:
+            self.capacity = self.capacity * 2
+        
+        tempStorage = self.storage
+
+        self.storage = [None] * self.capacity
+
+        for i in tempStorage:
+            r = i
+
+            while r is not None:
+                prev = r
+                r = prev.next
+                prev.next = None
+
+                self.put(prev.key, prev.value)
+        
+
 
 if __name__ == "__main__":
     ht = HashTable(2)
@@ -133,16 +176,16 @@ if __name__ == "__main__":
     print(ht.get("line_2"))
     print(ht.get("line_3"))
 
-    # # Test resizing
-    # old_capacity = len(ht.storage)
-    # ht.resize()
-    # new_capacity = len(ht.storage)
+    # Test resizing
+    old_capacity = len(ht.storage)
+    ht.resize()
+    new_capacity = len(ht.storage)
 
     # print(f"\nResized from {old_capacity} to {new_capacity}.\n")
 
-    # # Test if data intact after resizing
-    # print(ht.get("line_1"))
-    # print(ht.get("line_2"))
-    # print(ht.get("line_3"))
+    # Test if data intact after resizing
+    print(ht.get("line_1"))
+    print(ht.get("line_2"))
+    print(ht.get("line_3"))
 
-    # print("")
+    print("")
