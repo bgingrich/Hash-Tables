@@ -1,13 +1,34 @@
 import math
 import random
 
+answer_dict = dict()
+factorial_dict = dict()
+modulo_dict = dict()
+
 def slowfun(x, y):
     # TODO: Modify to produce the same results, but much faster
-    v = math.pow(x, y)
-    v = math.factorial(v)
-    v //= (x + y)
-    v %= 982451653
+    global answer_dict
+    global factorial_dict
+    global modulo_dict
 
+    if answer_dict.get(str(x) + ',' + str(y)):
+        return answer_dict[str(x) + ',' + str(y)]
+    v = math.pow(x,y)
+
+    if factorial_dict.get(v):
+        v = factorial_dict[v]
+    else:
+        v = math.factorial(v)
+        factorial_dict[v] = v
+    v //= (x + y)
+
+    if modulo_dict.get(v):
+        v = modulo_dict[v]
+    else:
+        v %= 982451653
+        modulo_dict[v] = v
+
+    answer_dict[str(x) + ',' + str(y)] = v
     return v
 
 
