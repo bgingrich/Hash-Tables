@@ -8,7 +8,6 @@ class HashTableEntry:
         self.value = value
         self.next = None
 
-
 class HashTable:
     """
     A hash table that with `capacity` buckets
@@ -16,20 +15,21 @@ class HashTable:
 
     Implement this.
     """
-
-    def fnv1(self, key):
-        """
-        FNV-1 64-bit hash function
-
-        Implement this, and/or DJB2.
-        """
-
+    def __init__ (self, capacity):
+        self.capacity = capacity
+        self.storage = [None] * capacity
+    
     def djb2(self, key):
         """
         DJB2 32-bit hash function
 
         Implement this, and/or FNV-1.
         """
+        hash = 5381
+        for i in key:
+            hash = ((hash << 5) + hash) + ord(i)
+            hash &= 0xffffffff
+        return hash
 
     def hash_index(self, key):
         """
@@ -47,6 +47,31 @@ class HashTable:
 
         Implement this.
         """
+        index = self.hash_index(key)
+        new_pair = HashTableEntry(key, value)
+
+        loadFactor = self.size() / self.capacity
+        if loadFactor > 0.7:
+            self.resize()
+
+        node = self.storage[index]
+        if node is None:
+            self.storage[index] = new_pair
+            return
+        
+        while node is not None and node.key != key:
+            prev = node
+            node = node.next
+
+        if node is None:
+            prev.next = new_pair
+        
+        else:
+            node.value = value
+
+        loadFactor = self.size() / self.capacity
+        if loadFactor > 0.7:
+            self.resize()
 
     def delete(self, key):
         """
@@ -56,6 +81,26 @@ class HashTable:
 
         Implement this.
         """
+        index = self.hash_index(key)
+        node = self.storage[index]
+        
+        if node.key == key:
+            self.storage[index] = node.next
+            return
+        
+        while node is not None and node.key != key:
+            prev = node
+            node = node.next
+        
+        if node is None:
+            print("f{key} not found")
+            return None
+
+        loadFactor = self.size() / self.capacity
+        if loadFactor > 0.7:
+            self.resize()
+        
+        prev.next = node.next
 
     def get(self, key):
         """
@@ -65,14 +110,57 @@ class HashTable:
 
         Implement this.
         """
+        index = self.hash_index(key)
+        node = self.storage[index]
 
-    def resize(self):
+        while node is not None and node.key != key:
+            node = node.next
+
+        if node is None:
+            return None
+        
+        else:
+            return node. value
+
+    def size(self):
+        size = 0
+        for i in self.storage:
+            r = i
+            while r is not None:
+                size += 1
+                if r.next is None:
+                    break
+                else:
+                    r = r.next
+        return size
+
+    def resize(self, new_capacity=None):
         """
         Doubles the capacity of the hash table and
         rehash all key/value pairs.
 
         Implement this.
         """
+        if new_capacity is not None:
+            self.capacity = new_capacity
+        else:
+            self.capacity = self.capacity * 2
+        
+        tempStorage = self.storage
+
+        self.storage = [None] * self.capacity
+
+        for i in tempStorage:
+            r = i
+
+            while r is not None:
+                prev = r
+                r = prev.next
+                prev.next = None
+
+                self.put(prev.key, prev.value)
+        
+
 
 if __name__ == "__main__":
     ht = HashTable(2)
@@ -93,7 +181,7 @@ if __name__ == "__main__":
     ht.resize()
     new_capacity = len(ht.storage)
 
-    print(f"\nResized from {old_capacity} to {new_capacity}.\n")
+    # print(f"\nResized from {old_capacity} to {new_capacity}.\n")
 
     # Test if data intact after resizing
     print(ht.get("line_1"))
